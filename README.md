@@ -30,8 +30,8 @@ Once installed, you can import the main class like so:
 
     >>> from kelmore_files import FileTools as Files
     >>>
-    >>> x = '/home/username/Downloads'              # Some folder
-    >>> y = '/home/username/Downloads/download.txt' # Some file
+    >>> x = '/home/username/Downloads'                          # Some folder
+    >>> y = '/home/username/Downloads/download.txt'             # Some file
     >>>
     >>> Files.check.exists(x)                                   # True
     >>> Files.check.is_directory(x)                             # True
