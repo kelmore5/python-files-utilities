@@ -39,7 +39,7 @@ Once installed, you can import the main class like so:
     >>> Files.directories.children(y)                           # ['download.txt']
     >>> Files.io_.copy(y, '/home/username/Downloads/copy.txt')  # None
     >>> Files.io_.delete('/home/username/Downloads/copy.txt')   # None
-    >>> Files.io_.text(y)                                       # 'hey look I'm a download'
+    >>> Files.io_.text(y)                                       # "hey look I'm a download"
     .
     .
     .
