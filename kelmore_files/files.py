@@ -99,7 +99,8 @@ class FileDirectories:
     @staticmethod
     def children(directory: str,
                  recursive: bool = False,
-                 include_full_path: bool = False) -> List[str]:
+                 include_full_path: bool = False,
+                 extension: str = None) -> List[str]:
         FileDirectories._raise_error_if_file(directory)
 
         children: List[str] = []
@@ -107,6 +108,9 @@ class FileDirectories:
             if include_full_path:
                 directories = [FileTools.concat(current_directory, x) for x in directories]
                 file_names = [FileTools.concat(current_directory, x) for x in file_names]
+
+            if extension:
+                file_names = FileTransform.filter_by_extension(file_names, extension)
 
             children.extend(directories)
             children.extend(file_names)
@@ -141,7 +145,7 @@ class FileDirectories:
             FileIO.delete(directory)
 
         if recursive:
-            shutil.rmtree(directory)
+            shutil.rmtree(directory, ignore_errors=True)
         else:
             os.rmdir(directory)
 
@@ -167,7 +171,8 @@ class FileDirectories:
     @staticmethod
     def files(directory: str,
               recursive: bool = False,
-              include_full_path: bool = False) -> List[str]:
+              include_full_path: bool = False,
+              extension: str = None) -> List[str]:
         FileDirectories._raise_error_if_file(directory)
 
         files: List[str] = []
@@ -176,6 +181,9 @@ class FileDirectories:
             if include_full_path:
                 parent: str = root[0]
                 child_files = [FileTools.concat(parent, x) for x in child_files]
+
+            if extension:
+                child_files = FileTransform.filter_by_extension(child_files, extension)
 
             files.extend(child_files)
             if not recursive:
@@ -190,6 +198,7 @@ class FileDirectories:
 
         while depth > 0:
             full_path = os.path.dirname(full_path)
+            depth -= 1
 
         return full_path
 
@@ -238,8 +247,7 @@ class FileIO:
             raise IOError('The given recipient path already exists')
 
         donor: str = FileIO.read(donor_path)
-        with FileIO.save(recipient_path, donor_path, overwrite=overwrite) as recipient:
-            recipient.write(donor)
+        FileIO.save(recipient_path, donor, overwrite=overwrite)
 
         return True
 
@@ -336,6 +344,19 @@ class FileNames:
 
 
 class FileTransform:
+
+    @staticmethod
+    def filter_by_extension(file_paths: List[str], extension: str) -> List[str]:
+        if not extension.startswith('.'):
+            extension = f'.{extension}'
+
+        filtered_file_names: List[str] = []
+        for file_path in file_paths:
+            split_file: Tuple[str, str] = os.path.splitext(file_path)
+            if split_file[1] == extension:
+                filtered_file_names.append(file_path)
+
+        return filtered_file_names
 
     @staticmethod
     def lines(full_path: str) -> Optional[List[str]]:
@@ -568,8 +589,8 @@ class FileWrapper:
 
         self.full_path = full_path
 
-        self.path = os.path.dirname(self.path)
-        self.name = os.path.basename(self.path)
+        self.path = os.path.dirname(self.full_path)
+        self.name = os.path.basename(self.full_path)
 
         self.check = FileWrapperCheck(self)
         self.count = FileWrapperCount(self)
